@@ -15,9 +15,11 @@ class EmployeeSeeder extends Seeder
      */
     public function run(): void
     {
-        $division = Division::first(); 
+        $divisions = Division::all();
 
         for ($i = 1; $i <= 5; $i++) {
+            $division = $divisions->random(); 
+
             Employee::create([
                 'id' => Str::uuid(),
                 'image' => 'https://via.placeholder.com/150',
