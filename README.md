@@ -8,7 +8,7 @@ API ini mencakup fitur login, logout, manajemen karyawan, dan divisi, serta memi
 ## Base URL
 
 ```
-domain
+https://adibapi.adibfirmannn.my.id/api
 ```
 
 ---
