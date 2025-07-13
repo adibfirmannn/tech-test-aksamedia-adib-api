@@ -1,66 +1,300 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Employee Management API - Documentation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem manajemen data karyawan berbasis Laravel API dengan autentikasi menggunakan Sanctum.
+API ini mencakup fitur login, logout, manajemen karyawan, dan divisi, serta memiliki autentikasi token dan response JSON standar.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Base URL
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```
+domain
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Autentikasi
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+API ini menggunakan **Laravel Sanctum**.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+* Token dikirim melalui header:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```
+Authorization: Bearer <token>
+```
 
-## Laravel Sponsors
+* Endpoint `login` hanya bisa diakses jika BELUM login.
+* Semua endpoint lainnya hanya bisa diakses SETELAH login.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+---
 
-### Premium Partners
+## Endpoints
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+### 1. Login Admin
 
-## Contributing
+**Endpoint:** `/login`
+**Method:** `POST`
+**Auth:** Tidak perlu token, tetapi akan ditolak jika sudah login.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+#### Request:
 
-## Code of Conduct
+```json
+{
+  "username": "admin",
+  "password": "pastibisa"
+}
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+#### Response (Sukses):
 
-## Security Vulnerabilities
+```json
+{
+  "status": "success",
+  "message": "Login berhasil",
+  "data": {
+    "token": "...",
+    "admin": {
+      "id": "uuid",
+      "name": "Admin",
+      "username": "admin",
+      "phone": "0812xxx",
+      "email": "admin@example.com"
+    }
+  }
+}
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+#### Response (Jika sudah login):
 
-## License
+```json
+{
+  "status": "error",
+  "message": "Anda sudah login."
+}
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+### 2. Logout Admin
+
+**Endpoint:** `/logout`
+**Method:** `POST`
+**Auth:** Harus login
+
+#### Response:
+
+```json
+{
+  "status": "success",
+  "message": "Berhasil logout"
+}
+```
+
+---
+
+### 3. Get All Employees
+
+**Endpoint:** `/employees`
+**Method:** `GET`
+**Auth:** Harus login
+**Filter:** Opsional `name`, `division_id`
+
+#### Request Contoh (Query Params):
+
+```
+/employees?name=adi&division_id=uuid
+```
+
+#### Response:
+
+```json
+{
+  "status": "success",
+  "message": "Data karyawan berhasil diambil",
+  "data": {
+    "employees": [
+      {
+        "id": "uuid",
+        "image": "url",
+        "name": "Nama",
+        "phone": "0812xxx",
+        "division": {
+          "id": "uuid",
+          "name": "Divisi"
+        },
+        "position": "Jabatan"
+      }
+    ]
+  },
+  "pagination": {
+    "current_page": 1,
+    "last_page": 3,
+    ...
+  }
+}
+```
+
+---
+
+### 4. Create Employee
+
+**Endpoint:** `/employees`
+**Method:** `POST`
+**Auth:** Harus login
+
+#### Request:
+
+```json
+{
+  "image": "file",
+  "name": "Nama Karyawan",
+  "phone": "0812xxx",
+  "division": "uuid-divisi",
+  "position": "Jabatan"
+}
+```
+
+#### Response:
+
+```json
+{
+  "status": "success",
+  "message": "Karyawan berhasil ditambahkan"
+}
+```
+
+---
+
+### 5. Update Employee
+
+**Endpoint:** `/employees/{id}`
+**Method:** `PUT`
+**Auth:** Harus login
+
+#### Request:
+
+```json
+{
+  "image": "file",
+  "name": "Nama Baru",
+  "phone": "No Baru",
+  "division": "uuid-divisi",
+  "position": "Jabatan Baru"
+}
+```
+
+#### Response:
+
+```json
+{
+  "status": "success",
+  "message": "Data karyawan berhasil diperbarui"
+}
+```
+
+---
+
+### 6. Delete Employee
+
+**Endpoint:** `/employees/{id}`
+**Method:** `DELETE`
+**Auth:** Harus login
+
+#### Response:
+
+```json
+{
+  "status": "success",
+  "message": "Data karyawan berhasil dihapus"
+}
+```
+
+---
+
+### 7. Get All Divisions
+
+**Endpoint:** `/divisions`
+**Method:** `GET`
+**Auth:** Harus login
+**Filter:** Opsional `name`
+
+#### Request:
+
+```
+/divisions?name=IT
+```
+
+#### Response:
+
+```json
+{
+  "status": "success",
+  "message": "Data divisi berhasil diambil",
+  "data": {
+    "divisions": [
+      {
+        "id": "uuid",
+        "name": "IT"
+      }
+    ]
+  },
+  "pagination": {
+    "current_page": 1,
+    ...
+  }
+}
+```
+
+---
+
+## Error Response Format
+
+```json
+{
+  "status": "error",
+  "message": "Pesan kesalahan",
+  "errors": {
+    "field": ["Alasan error"]
+  }
+}
+```
+
+---
+
+## Aturan Akses API
+
+| Endpoint          | Auth Diperlukan | Keterangan                           |
+| ----------------- | --------------- | ------------------------------------ |
+| POST /login       | ❌               | Ditolak jika sudah login             |
+| POST /logout      | ✅               | Hanya bisa jika sudah login          |
+| GET /employees    | ✅               | Filter opsional by name/division_id |
+| POST /employees   | ✅               | Buat karyawan                        |
+| PUT /employees    | ✅               | Update karyawan                      |
+| DELETE /employees | ✅               | Hapus karyawan                       |
+| GET /divisions    | ✅               | Filter opsional by name              |
+
+---
+## JANGAN LUPA SELAIN Endpoint /login, wajib mengirimkan bearer token
+
+## Setup Project Lokal
+
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan serve
+```
+
+---
+
+## Admin Default (Seeder)
+
+| Username | Password  |
+| -------- | --------- |
+| admin    | pastibisa |
+
+---
+
+
+
